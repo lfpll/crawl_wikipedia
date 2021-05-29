@@ -12,7 +12,7 @@ class UrlDbModel(BaseDbModel):
     # Asserting some rules to garantee data quality
     id = Column(Integer,primary_key=True, index=True)
     url = Column(String,unique=True,index=True,nullable=False)
-    appearances = Column(Integer,index=True,nullable=True)
+    appearances = Column(Integer,nullable=True,default=1)
     f0 =  Column(String,nullable=True)  
     f1 =  Column(String,nullable=True)
     f2 =  Column(String,nullable=True)
