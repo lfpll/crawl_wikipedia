@@ -46,4 +46,8 @@ def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get
 @app.put("/url/increment/{url}",response_model=UrlBase)
 def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
     url_info = get_url_information(url=url,db=db)
-    return crud.increment_url(url=url,db=db)
+    if url_info:
+        return crud.increment_url(url=url,db=db)
+    else:
+        return create_url_endpoint(url=url,db=db)
+        
