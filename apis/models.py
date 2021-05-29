@@ -1,7 +1,9 @@
 # File with pydantic and db models
 from sqlalchemy import String,Integer,Column
-from .db import BaseDbModel
-from pydantic import BaseModel,HttpUrl,Optional
+from db import BaseDbModel
+from pydantic import BaseModel,HttpUrl
+from pydantic.typing import Optional
+
 
 # DB model
 class UrlDbModel(BaseDbModel):
