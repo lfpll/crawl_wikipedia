@@ -42,3 +42,8 @@ def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get
         raise HTTPException(status_code=404, detail="Url doens't exist")
     return crud.update_url(db=db,url=url,data=update_data)
 
+
+@app.put("/url/increment/{url}",response_model=UrlBase)
+def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
+    url_info = get_url_information(url=url,db=db)
+    return crud.increment_url(url=url,db=db)
