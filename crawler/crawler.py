@@ -1,10 +1,12 @@
 from threading import Thread
 from queue import Queue
 import logging 
+from time import sleep
 
 from pydantic import HttpUrl,BaseModel
 from pydantic.typing import List,Optional
 from bs4 import BeautifulSoup,SoupStrainer
+
 
 import requests
 import grequests
@@ -17,12 +19,14 @@ class UrlModel(BaseModel):
 class Worker(Thread):
 
     def __init__(self,worker_id:int,max_depth:int,
-                    queue:Queue,incremental_endpoint:HttpUrl):
+                    queue:Queue,incremental_endpoint:HttpUrl,max_retries:int=5,sleep_time:int=2):
         super().__init__()
         self.worker_id     = worker_id
         self.max_depth     = max_depth
         self.queue         = queue
         self.incremental_endpoint = incremental_endpoint
+        self.max_retries  = max_retries
+        self.sleep_time   = sleep_time
     
     # Capture the urls from the current webpage
     def __capture_urls(self,page:str) -> List[HttpUrl]:
@@ -54,13 +58,19 @@ class Worker(Thread):
 
   
     def run(self):
+        retries = 0
         logging.info('Worker %s spawed'%worker_id)
-        while not Queue.empty():
-            # If multiple async workers the while condition may not be enough
+        while True:
+
+            # Checking if there is urls in queue
             father_obj : Optional[UrlModel]  = self.__pull_url()
             if not father_obj:
-                logging.info('Worker %s stoped, no more urls'%self.worker_id)
-                break
+                retries = retries + 1
+                if retries > self.max_retries:
+                    logging.info('Worker %s stoped, no more urls'%self.worker_id)
+                    break
+                sleep(self.sleep_time)
+                continue
             
             # Case where the depth is already on max
             if father_url.depth + 1 > self.max_depth:
