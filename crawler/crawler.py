@@ -1,6 +1,8 @@
+import logging 
+import grequests
+import requests
 from threading import Thread
 from queue import Queue
-import logging 
 from time import sleep
 
 from pydantic import HttpUrl,BaseModel
@@ -8,8 +10,6 @@ from pydantic.typing import List,Optional
 from bs4 import BeautifulSoup,SoupStrainer
 
 
-import requests
-import grequests
 
 class UrlModel(BaseModel):
     url: HttpUrl
@@ -30,7 +30,7 @@ class Worker(Thread):
     
     # Capture the urls from the current webpage
     def __capture_urls(self,page:str) -> List[HttpUrl]:
-        urls = []
+        urls: List[HttpUrl] = []
         # Avoid smart code (compressed loop)
         for link in BeautifulSoup(page,parse_only=SoupStrainer('a')):
             if link.has_attr('href'):
@@ -57,13 +57,12 @@ class Worker(Thread):
         return response.content
 
   
-    def run(self):
-        retries = 0
-        logging.info('Worker %s spawed'%worker_id)
+    def run(self,retries = 0):
+        logging.info('Worker %s spawed'%self.worker_id)
         while True:
 
             # Checking if there is urls in queue
-            father_obj : Optional[UrlModel]  = self.__pull_url()
+            father_obj : Optional[UrlModel]  = self.__pull_url_obj()
             if not father_obj:
                 retries = retries + 1
                 if retries > self.max_retries:
@@ -73,35 +72,29 @@ class Worker(Thread):
                 continue
             
             # Case where the depth is already on max
-            if father_url.depth + 1 > self.max_depth:
-                logging.info('Max depth reached on  %s with %s'%(father.url,self.worker_id))
+            if father_obj.depth + 1 > self.max_depth:
+                logging.info('Max depth reached on  %s with %s'%(father_obj.url,self.worker_id))
                 continue
 
             content: bytes = self.__get_page(father_obj.url)
             child_urls: List[HttpUrl] = self.__capture_urls(content)
+            
+            if child_urls:
+                # TODO separate this to another worker
+                # Adding appearances values using the incremental api
+                urls = ['%s/%s'%(self.incremental_endpoint,url) for url in child_urls]
+                grequests.map([grequests.put(url) for url in urls])
+                
+                # Creating the list of pastUrls
+                father_obj.past_urls.append(father_obj.url)
+                
+                # Transforming the urls into  url objects
+                urls_objs: List[UrlModel] =  [UrlModel(url=url,
+                                                depth=father_obj.depth +1,
+                                                past_urls=father_obj.past_urls) 
+                                                for url in child_urls
+                                                if url not in father_obj.past_urls]
 
-            # TODO separate this to another worker
-            # Adding appearances values using the incremental api
-            http_session = requests.Session()
-            retries = Retry(total=5, backoff_factor=0.2, status_forcelist=[500, 502, 503, 504], raise_on_redirect=True,
-                    raise_on_status=True)
-            http_session.mount('http://', HTTPAdapter(max_retries=retries))
-            http_session.mount('https://', HTTPAdapter(max_retries=retries))
-            grequests.map([grequests.put('%s/%s'%(self.incremental_endpoint,url),
-                                        session=http_session)
-                             for url in child_urls])
-            
-            # Creating the list of pastUrls
-            past_urls: List[HttpUrl] = [father_obj.past_urls,father_obj.url]
 
-            # Transforming the urls into  url objects
-            urls_objs: List[UrlModel] =  [UrlModel(url=url,
-                                            depth=father_obj.depth +1,
-                                            past_urls=past_urls) 
-                                            for url in child_urls
-                                            if url not in past_urls]
-            
-            self.__send_urls(urls_objs)
-            
-            
-            
+                self.__send_urls(urls_objs)
+            retries = 0
