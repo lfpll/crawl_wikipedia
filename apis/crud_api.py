@@ -19,7 +19,7 @@ def get_db():
 
 # Read
 @app.get("/url/{url}",response_model=Url)
-def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
+async def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
         raise HTTPException(status_code=404, detail="Url doens't exist")
@@ -27,7 +27,7 @@ def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
 
 # Insert
 @app.post("/url/",response_model=UrlBase)
-def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
+async def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if url_info:
         raise HTTPException(status_code=400, detail="Url already exist")
@@ -36,7 +36,7 @@ def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
     
 # Update
 @app.put("/url/{url}",response_model=UrlBase)
-def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get_db)):
+async def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
         raise HTTPException(status_code=404, detail="Url doens't exist")
@@ -44,7 +44,7 @@ def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get
 
 
 @app.put("/url/increment/{url}",response_model=UrlBase)
-def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
+async def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
     url_info = get_url_information(url=url,db=db)
     if url_info:
         return crud.increment_url(url=url,db=db)

@@ -5,6 +5,7 @@ from pydantic import BaseModel,HttpUrl
 from pydantic.typing import Optional
 
 
+
 # DB model
 class UrlDbModel(BaseDbModel):
     __tablename__ = "urls"
