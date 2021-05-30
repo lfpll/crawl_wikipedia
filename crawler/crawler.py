@@ -10,7 +10,6 @@ from pydantic.typing import List,Optional
 from bs4 import BeautifulSoup,SoupStrainer
 
 
-
 class UrlModel(BaseModel):
     url: HttpUrl
     depth: int = 0
@@ -29,7 +28,7 @@ class Worker(Thread):
         self.sleep_time   = sleep_time
     
     # Capture the urls from the current webpage
-    def __capture_urls(self,page:str) -> List[HttpUrl]:
+    def capture_urls(self,page:str) -> List[HttpUrl]:
         urls: List[HttpUrl] = []
         # Avoid smart code (compressed loop)
         for link in BeautifulSoup(page,parse_only=SoupStrainer('a')):
@@ -52,10 +51,16 @@ class Worker(Thread):
             response = requests.get(url)
             response.raise_for_status()
         except Exception as error:
-            logging.error('Worker %s stopped because of %s'%(self.worker_id,str(error)))
+            logging.error('Worker %s stopped on %s because of %s'%
+                                    (self.worker_id,url,str(error)))
             raise error
         return response.content
 
+    def send_incremental(self,child_urls):
+        # TODO separate this to another worker
+        # Adding appearances values using the incremental api
+        urls_calls = ['%s/%s'%(self.incremental_endpoint,url) for url in child_urls]
+        grequests.map([grequests.put(url) for url in urls_calls])
   
     def run(self,retries = 0):
         logging.info('Worker %s spawed'%self.worker_id)
@@ -66,24 +71,21 @@ class Worker(Thread):
             if not father_obj:
                 retries = retries + 1
                 if retries > self.max_retries:
-                    logging.info('Worker %s stoped, no more urls'%self.worker_id)
+                    logging.warning('Worker %s stopped, no urls on queue'%self.worker_id)
                     break
                 sleep(self.sleep_time)
                 continue
             
             # Case where the depth is already on max
             if father_obj.depth + 1 > self.max_depth:
-                logging.info('Max depth reached on  %s with %s'%(father_obj.url,self.worker_id))
+                logging.info('Max depth reached on worker %s with %s'%(father_obj.url,self.worker_id))
                 continue
 
             content: bytes = self.__get_page(father_obj.url)
-            child_urls: List[HttpUrl] = self.__capture_urls(content)
-            
+            child_urls: List[HttpUrl] = self.capture_urls(content)
             if child_urls:
-                # TODO separate this to another worker
-                # Adding appearances values using the incremental api
-                urls = ['%s/%s'%(self.incremental_endpoint,url) for url in child_urls]
-                grequests.map([grequests.put(url) for url in urls])
+                # Update appearances count
+                self.send_incremental(child_urls=child_urls)
                 
                 # Creating the list of pastUrls
                 father_obj.past_urls.append(father_obj.url)
