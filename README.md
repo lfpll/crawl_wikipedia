@@ -22,6 +22,12 @@ Then it will generate some features based on that url
 - Runner
     - Setup Worker and Queue to run
 
+
+#### TEsts
+
+Because of the short the time the tests are somewhat generic and only test functionality
+
+
 ### Architectural decisions
 
 ####  Apis
@@ -30,11 +36,15 @@ Using fastapi  because of percomance, also isolating the databse from direct con
 
 #### Crawler
 
-Using simple python code, a language easy to prototype, using internal queues that can be replaced for redis queues
+Using simple python code, language easy to prototype, using internal queues that can be replaced for other queues
 
 ### Possible Future improvements
 
-1. Use proxy rotator *** and isolate the incremental calls from the worker
+1. Worker
+    - Proxy Rotator
+    - Isolate Workers from sending incremental (outside queue)
+    - Multiple async calls and load of pages 
+    - Priority queue of proxy rotator based on blockage (pull multiple queue pages)
 2. Use redis as queue and incremental value
 3. Spawn workers using with it's own containers
 4. Devops training of the model
