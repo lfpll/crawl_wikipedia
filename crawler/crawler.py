@@ -62,11 +62,13 @@ class Worker(Thread):
             raise error
         return response.content
 
-    def send_incremental(self,child_urls):
+    def send_incremental(self,child_urls,n=10):
         # TODO separate this to another worker
         # Adding appearances values using the incremental api
         urls_calls = ['%s/%s'%(self.incremental_endpoint,url) for url in child_urls]
-        grequests.map([grequests.put(url) for url in urls_calls])
+        for i in range(0, len(urls_calls), n):            
+            grequests.map([grequests.put(url) for url in urls_calls[i:i + n]])
+  
   
     def run(self,retries = 0):
         logging.info('Worker %s spawed'%self.worker_id)
@@ -95,10 +97,14 @@ class Worker(Thread):
             if child_urls:
                 # Creating the list of pastUrls
                 father_obj.past_urls.append(father_obj.url)
-                # Transforming the urls into  url objects
-                urls_objs =  [UrlModel(url=url,depth=father_obj.depth + 1, past_urls=list(set(father_obj.past_urls)))
-                                                for url in child_urls
-                                                if url not in father_obj.past_urls and url.find('http') > - 1]
+                # Transforming the urls into  url objects avoiding bugs with http
+                urls_objs = []
+                for url in child_urls:
+                    if url not in father_obj.past_urls:
+                        urls_objs.append(UrlModel(url=url,
+                                                depth=father_obj.depth +1,
+                                                past_urls=father_obj.past_urls))
+
                 self.__send_urls(urls_objs)
                 # Update appearances count
                 # self.send_incremental(child_urls=child_urls)
