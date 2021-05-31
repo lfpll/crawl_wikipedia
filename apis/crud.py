@@ -12,13 +12,14 @@ def create_url(db: Session,url:UrlBase):
     return new_url
 
 def get_url(db:Session, url:UrlBase):
-    return db.query(UrlDbModel.url == url).limit(1).all()
+    return db.query(UrlDbModel).where(UrlDbModel.url == url).limit(1).all()
 
 def update_url(db:Session,url:HttpUrl,data:Url) -> Url:
     data = db.query().where(UrlDbModel.url == url).update(**data,synchronize_session="fetch")
     return data
 
 def increment_url(db:Session,url:HttpUrl) -> Url:
-    data = db.query().where(UrlDbModel.url == url).update(appearances = UrlDbModel.appearances + 1,synchronize_session="fetch")
-    return data
+    db.query(UrlDbModel).filter(UrlDbModel.url == url).update({UrlDbModel.appearances: UrlDbModel.appearances + 1},synchronize_session="fetch")
+    db.commit()
+    return get_url(db,url)
 

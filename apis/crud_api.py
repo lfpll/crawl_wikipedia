@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Depends,HTTPException
 from models  import Url,UrlBase
 from pydantic import HttpUrl
-
+from pydantic.typing import List
 from db import SessionLocal,BaseDbModel,engine
 from sqlalchemy.orm import Session
 import crud 
@@ -43,11 +43,12 @@ async def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depen
     return crud.update_url(db=db,url=url,data=update_data)
 
 
-@app.put("/url/increment/{url}",response_model=UrlBase)
-async def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
-    url_info = get_url_information(url=url,db=db)
+@app.put("/url/increment/{url:path}")
+def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
+    url_info = crud.get_url(url=url,db=db)
     if url_info:
-        return crud.increment_url(url=url,db=db)
+        data = crud.increment_url(url=url,db=db)
+        return data
     else:
         return create_url_endpoint(url=url,db=db)
         

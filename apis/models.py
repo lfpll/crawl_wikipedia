@@ -28,18 +28,19 @@ class UrlDbModel(BaseDbModel):
 
 # Pydantic Models
 class UrlBase(BaseModel):
-    url : HttpUrl
+    url : str
 
 class Url(UrlBase):
-    appearances: Optional[int]
-    f0:  Optional[str]
-    f1:  Optional[str]
-    f2:  Optional[str]
-    f3:  Optional[str]
-    f4:  Optional[str]
-    f5:  Optional[str]
-    f6:  Optional[str]
-    f7:  Optional[str]
-    f8:  Optional[str]
-    f9:  Optional[str]
-    f10: Optional[str]
+    id: int
+    appearances: Optional[int] = 1
+    f0:  Optional[str] = None
+    f1:  Optional[str] = None
+    f2:  Optional[str] = None
+    f3:  Optional[str] = None
+    f4:  Optional[str] = None
+    f5:  Optional[str] = None
+    f6:  Optional[str] = None
+    f7:  Optional[str] = None
+    f8:  Optional[str] = None
+    f9:  Optional[str] = None
+    f10: Optional[str] = None
