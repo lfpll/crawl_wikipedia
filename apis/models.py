@@ -2,7 +2,7 @@
 from sqlalchemy import String,Integer,Column,Float,Boolean
 from db import BaseDbModel
 from pydantic import BaseModel,HttpUrl
-from pydantic.typing import Optional
+from pydantic.typing import Optional,Set
 
 
 
@@ -28,19 +28,24 @@ class UrlDbModel(BaseDbModel):
 
 # Pydantic Models
 class UrlBase(BaseModel):
+    id: int
     url : str
 
+    class Config:
+        orm_mode = True
+
+
 class Url(UrlBase):
-    id: int
-    appearances: Optional[int] = 1
-    domain:  Optional[str] = None
-    path:  Optional[str] = None
-    is_file:  Optional[bool] = None
-    percent_of_letters_path:  Optional[float] = None
-    percent_of_numbers_path:  Optional[float] = None
-    path_length:  Optional[int] = None
-    last_path_length:  Optional[int] = None
-    full_lengh:  Optional[int] = None
-    is_arabic:  Optional[bool] = None
-    number_of_subpaths:  Optional[int] = None
-    related_original_url: Optional[bool] = None
+    appearances: Optional[int]
+    domain:  Optional[str]
+    path:  Optional[str]
+    is_file:  Optional[bool]
+    is_arabic:  Optional[bool]
+    last_path_length:  Optional[int]
+    percent_of_letters_path:  Optional[float]
+    percent_of_numbers_path:  Optional[float]
+    path_length:  Optional[int]
+    full_lengh:  Optional[int]
+    number_of_subpaths:  Optional[int]
+    related_original_url: Optional[bool]
+

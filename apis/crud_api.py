@@ -18,7 +18,7 @@ def get_db():
         db.close()
 
 # Read
-@app.get("/url/{url}",response_model=Url)
+@app.get("/url/{url:path}",response_model=UrlBase)
 async def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
@@ -28,14 +28,15 @@ async def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
 # Insert
 @app.post("/url/",response_model=UrlBase)
 async def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
-    url_info = crud.get_url(db=db,url=url)
+    url_info = crud.get_url(db=db,url=url.url)
     if url_info:
         raise HTTPException(status_code=400, detail="Url already exist")
-    return crud.create_url(db=db,url=url)
+    new_url = crud.create_url(db=db,url=url) 
+    return new_url
 
     
 # Update
-@app.put("/url/{url}",response_model=UrlBase)
+@app.put("/url/{url:path}",response_model=UrlBase)
 async def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
