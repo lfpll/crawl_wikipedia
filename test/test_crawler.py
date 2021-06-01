@@ -1,6 +1,10 @@
 import pytest
 import logging
-from crawler.crawler import Worker,UrlModel
+
+import sys
+sys.path.append('/home/luizlobo/Documents/code/desafio_ml/')
+
+from crawler.crawler_async import Worker,UrlModel,UniqueQueue
 from queue import Queue
 import responses
 import pathlib
@@ -35,25 +39,25 @@ class TestCrawler:
     def __start_queue(self,queue):
         while queue.qsize() > 0:
             queue.get()
-        queue.put(UrlModel(url='http://test.com/parent.html'))
+        queue.add(UrlModel(url='http://test.com/parent.html'))
     
     @responses.activate
     def test_incremental(self,monkeypatch,mock_requests):
         urls_output = []
-        queue = Queue() 
+        queue = UniqueQueue() 
         self.__start_queue(queue)
-        crawler = Worker(worker_id=1,max_depth=2,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0)  
+        crawler = Worker(worker_id=1,max_depth=4,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0,workers_size=1)  
         monkeypatch.setattr(crawler,'send_incremental',lambda child_urls: urls_output.extend(child_urls))
         
         # Trigger first url
         crawler.run()
-        assert sorted(urls_output) == ['http://test.com/child1.html', 'http://test.com/child2.html', 'http://test.com/child3.html']
+        assert sorted([url.url for url in urls_output]) == ['http://test.com/child1.html', 'http://test.com/child2.html', 'http://test.com/child3.html','http://test.com/parent.html']
 
 
     def test_max_retries(self,caplog):
         with caplog.at_level(logging.WARNING):
-            queue = Queue() 
+            queue = UniqueQueue() 
             self.__start_queue(queue)
-            crawler = Worker(worker_id=1,max_depth=1,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0,max_retries=0)  
+            crawler = Worker(worker_id=1,max_depth=1,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0,max_retries=0,workers_size=1)
             crawler.run(retries=0)
             assert 'Worker 1 stopped, no urls on queue' in  caplog.text
