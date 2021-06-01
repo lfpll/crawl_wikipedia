@@ -1,10 +1,6 @@
 import pytest
 import logging
-
-import sys
-sys.path.append('/home/luizlobo/Documents/code/desafio_ml/')
-
-from crawler.crawler_async import Worker,UrlModel,UniqueQueue
+from crawler.crawler import Worker,UrlModel,UniqueQueue
 from queue import Queue
 import responses
 import pathlib
