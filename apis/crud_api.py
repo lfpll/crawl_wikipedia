@@ -36,6 +36,15 @@ async def create_url_endpoint(url:Url,db:Session = Depends(get_db)):
     new_url = crud.create_url(db=db,url=url) 
     return new_url
 
+@app.put("/url/increment/{url:path}")
+def increment_url(url: HttpUrl, db: Session = Depends(get_db)):
+    url_info = crud.get_url(url=url,db=db)
+    if url_info:
+        data = crud.increment_url(url=url,db=db)
+        return data
+    else:
+        return crud.create_url(url=Url(url=url),db=db)
+        
     
 # Update
 @app.put("/url/{url:path}",response_model=Url)
@@ -46,12 +55,3 @@ async def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depen
     return crud.update_url(db=db,url=url,data=update_data)
 
 
-@app.put("/url/increment/{url:path}")
-def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
-    url_info = crud.get_url(url=url,db=db)
-    if url_info:
-        data = crud.increment_url(url=url,db=db)
-        return data
-    else:
-        return crud.create_url(url=Url(url=url),db=db)
-        
