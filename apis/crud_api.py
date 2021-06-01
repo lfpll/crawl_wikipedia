@@ -1,10 +1,12 @@
 from fastapi import FastAPI,Depends,HTTPException
-from models  import Url,UrlBase
+from apis.schemas  import UrlBase,Url
+from apis.db import SessionLocal,BaseDbModel,engine
+from apis import crud
 from pydantic import HttpUrl
 from pydantic.typing import List
-from db import SessionLocal,BaseDbModel,engine
+
 from sqlalchemy.orm import Session
-import crud 
+
 
 app = FastAPI()
 
@@ -18,7 +20,7 @@ def get_db():
         db.close()
 
 # Read
-@app.get("/url/{url:path}",response_model=UrlBase)
+@app.get("/url/{url:path}",response_model=Url)
 async def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
@@ -26,8 +28,8 @@ async def get_url_information(url:HttpUrl,db:Session = Depends(get_db)):
     return url_info
 
 # Insert
-@app.post("/url/",response_model=UrlBase)
-async def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
+@app.post("/url/",response_model=Url)
+async def create_url_endpoint(url:Url,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url.url)
     if url_info:
         raise HTTPException(status_code=400, detail="Url already exist")
@@ -36,7 +38,7 @@ async def create_url_endpoint(url:UrlBase,db:Session = Depends(get_db)):
 
     
 # Update
-@app.put("/url/{url:path}",response_model=UrlBase)
+@app.put("/url/{url:path}",response_model=Url)
 async def update_url_endpoint(url:HttpUrl,update_data:UrlBase,db:Session = Depends(get_db)):
     url_info = crud.get_url(db=db,url=url)
     if not url_info:
@@ -51,5 +53,5 @@ def increment_url(url:HttpUrl, db: Session = Depends(get_db)):
         data = crud.increment_url(url=url,db=db)
         return data
     else:
-        return create_url_endpoint(url=url,db=db)
+        return crud.create_url(url=Url(url=url),db=db)
         
