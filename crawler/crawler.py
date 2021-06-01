@@ -31,13 +31,13 @@ class UrlModel(BaseModel):
 class Worker(Thread):
 
     def __init__(self,worker_id:int,max_depth:int,
-                    queue:Queue,incremental_endpoint:HttpUrl,workers_size:int,
+                    queue:Queue,count_endpoint:HttpUrl,workers_size:int,
                     max_retries:int=5,sleep_time:float=2.0):
         super().__init__()
         self.worker_id     = worker_id
         self.max_depth     = max_depth
         self.queue         = queue
-        self.incremental_endpoint = incremental_endpoint
+        self.count_endpoint = count_endpoint
         self.max_retries  = max_retries
         self.sleep_time   = sleep_time
         self.workers_size = workers_size
@@ -72,7 +72,7 @@ class Worker(Thread):
     def send_incremental(self,child_urls,n=100):
         # TODO separate this to another worker
         # Adding appearances values using the incremental api
-        urls_calls = ['%s/%s'%(self.incremental_endpoint,url.url) for url in child_urls]
+        urls_calls = ['%s/%s'%(self.count_endpoint,url.url) for url in child_urls]
         size = 0
         for i in range(0, len(urls_calls), n):
             split_url = urls_calls[i:i + n]

@@ -42,7 +42,7 @@ class TestCrawler:
         urls_output = []
         queue = UniqueQueue() 
         self.__start_queue(queue)
-        crawler = Worker(worker_id=1,max_depth=4,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0,workers_size=1)  
+        crawler = Worker(worker_id=1,max_depth=4,queue=queue,count_endpoint=self.incremental_endpoint,sleep_time=0,workers_size=1)  
         monkeypatch.setattr(crawler,'send_incremental',lambda child_urls: urls_output.extend(child_urls))
         
         # Trigger first url
@@ -54,6 +54,6 @@ class TestCrawler:
         with caplog.at_level(logging.WARNING):
             queue = UniqueQueue() 
             self.__start_queue(queue)
-            crawler = Worker(worker_id=1,max_depth=1,queue=queue,incremental_endpoint=self.incremental_endpoint,sleep_time=0,max_retries=0,workers_size=1)
+            crawler = Worker(worker_id=1,max_depth=1,queue=queue,count_endpoint=self.incremental_endpoint,sleep_time=0,max_retries=0,workers_size=1)
             crawler.run(retries=0)
             assert 'Worker 1 stopped, no urls on queue' in  caplog.text
