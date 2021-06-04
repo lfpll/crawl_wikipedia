@@ -51,9 +51,9 @@ Replace the id of the container with the one of the crawler, run:
 
 This will start running the code and crawling the url in the [crawler/crawler.py](crawler/main.py), to check the data you can use the fast api docks in
 
-[Crud Api Swagger](http://127.0.0.0:80/docs)
+[Crud Api Swagger](http://27.0.0.1:80/docs)
 
-[ML Api Swagger](http://127.0.0.0:90/docs)
+[ML Api Swagger](http://127.0.0.1:90/docs)
 
 The get endpoints of both are able to check for the urls being in the database.
 
@@ -101,4 +101,4 @@ P.S: lambda + Pubsub was not considered because of requirements of the project, 
 
 ## Current Architecture
 
-![Architecthure V0.1](./architecture.png)
+![Architecthure V0.1](/architecture.png)
