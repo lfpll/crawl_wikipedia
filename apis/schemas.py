@@ -12,8 +12,7 @@ class UrlBase(BaseModel):
 
 class Url(UrlBase):
     appearances: Optional[int]
-    domain:  Optional[str]
-    path:  Optional[str]
+    domain_length:  Optional[int]
     is_file:  Optional[bool]
     is_arabic:  Optional[bool]
     last_path_length:  Optional[int]
