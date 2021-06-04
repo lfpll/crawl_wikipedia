@@ -5,10 +5,9 @@ from threading import Thread
 from queue import Queue
 from time import sleep
 from urllib.parse import urljoin
-import math
 
 from pydantic import HttpUrl,BaseModel
-from pydantic.typing import List,Optional,Union
+from pydantic.typing import List,Optional
 from bs4 import BeautifulSoup,SoupStrainer
 
 
