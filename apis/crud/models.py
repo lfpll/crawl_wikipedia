@@ -1,6 +1,5 @@
 # File with pydantic and db models
 from sqlalchemy import String,Integer,Column,Float,Boolean
-from sqlalchemy.sql.expression import null
 from apis.crud.db import BaseDbModel
 
 # DB model

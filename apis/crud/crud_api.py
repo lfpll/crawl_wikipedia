@@ -3,7 +3,6 @@ from apis.crud.schemas  import UrlBase,Url
 from apis.crud.db import SessionLocal,BaseDbModel,engine
 from apis.crud import crud
 from pydantic import HttpUrl
-from pydantic.typing import List
 
 from sqlalchemy.orm import Session
 

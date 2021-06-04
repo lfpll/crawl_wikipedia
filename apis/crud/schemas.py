@@ -1,5 +1,5 @@
-from pydantic import BaseModel,HttpUrl
-from pydantic.typing import Optional,Set
+from pydantic import BaseModel
+from pydantic.typing import Optional
 
 # Pydantic Models
 class UrlBase(BaseModel):

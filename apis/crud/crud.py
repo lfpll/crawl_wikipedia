@@ -2,7 +2,6 @@ from apis.crud.models import UrlDbModel
 from apis.crud.schemas import Url
 from sqlalchemy.dialects.postgresql import insert
 from pydantic import HttpUrl
-from pydantic.typing import List
 from sqlalchemy.orm import Session
 from apis.ml_model.model import AppearancesModel
 
