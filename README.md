@@ -37,9 +37,11 @@ Using simple python code, language easy to prototype with internal queues that c
 
 This code users docker-compose to conteinerize everything, simply:
 
-    run docker-compose build
+    docker-compose build
 
-Besides building the code also trian ml_model api using the sample in the folder.
+Besides building the code also trian ml_model api using the sample in the folder, start the containers:
+
+    docker-compose up
 
 Then you can access the docker container which runs the crawler with:
 
