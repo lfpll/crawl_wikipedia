@@ -30,7 +30,7 @@ class UrlModel(BaseModel):
 class Worker(Thread):
 
     def __init__(self,worker_id:int,max_depth:int,
-                    queue:Queue,count_endpoint:HttpUrl,workers_size:int,
+                    queue:UniqueQueue,count_endpoint:HttpUrl,workers_size:int,
                     max_retries:int=5,sleep_time:float=2.0):
         super().__init__()
         self.worker_id     = worker_id
@@ -42,8 +42,8 @@ class Worker(Thread):
         self.workers_size = workers_size
     
     # Capture the urls from the current webpage
-    def capture_urls(self,page:str,father_url:HttpUrl) -> List[HttpUrl]:
-        urls: List[HttpUrl] = []
+    def capture_urls(self,page:str,father_url:HttpUrl) -> List[str]:
+        urls: List[str] = []
         # Avoid smart code (compressed loop)
         for link in BeautifulSoup(page,parse_only=SoupStrainer('a')):
             # Removing non link urls

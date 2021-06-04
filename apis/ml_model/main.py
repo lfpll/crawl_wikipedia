@@ -1,6 +1,5 @@
 # Creating feature columns
-import re
-from model import AppearancesModel
+from apis.ml_model.model import AppearancesModel
 import pandas as pd
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__))

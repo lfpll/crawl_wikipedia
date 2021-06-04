@@ -3,10 +3,9 @@ import os
 import json
 
 from fastapi import FastAPI,HTTPException
-from pydantic import HttpUrl
 from os.path import dirname,realpath
 from apis.ml_model.model import AppearancesModel
-from apis.schemas import Url
+from apis.crud.schemas import Url
 app = FastAPI()
 
 dir_path = dirname(realpath(__file__))
