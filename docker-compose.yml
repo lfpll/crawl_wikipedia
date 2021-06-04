@@ -1,0 +1,48 @@
+services:
+  db:
+    build: .
+    ports:
+      - "5432:5432"
+    image: postgres
+    environment:  
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+  web:
+    build: .
+    ports:
+      - "80:80"
+    links:
+      - db:database
+    environment:  
+      - CONN_STRING=postgresql://postgres:mysecretpassword@database:5432/postgres
+    image: crud
+    depends_on: 
+      - db
+    restart: 
+      unless-stopped
+  crawler:
+      build: .
+      links:
+        - web
+      environment:  
+        - ENDPOINT_URL=http://web:80/url/increment
+      image: crawler
+      depends_on: 
+        - web
+        - ml_api
+      restart: 
+        unless-stopped
+  ml_api:
+    build: .
+    ports:
+      - "90:90"
+    links:
+      - web
+    environment:  
+      - SQL_API_URL=http://web:80/url/
+    image: ml_api
+    depends_on: 
+      - web
+    restart: 
+      unless-stopped
