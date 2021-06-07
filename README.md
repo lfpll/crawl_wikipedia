@@ -21,7 +21,7 @@ Then it will generate some features based on that url
     - Capture the information from the pages
     - Add new urls to the queue
     - Increment the url appearances
-    - Single workers no multiple async requests
+    - Single workers with multiple async requests
 
 ## Architectural decisions
 
